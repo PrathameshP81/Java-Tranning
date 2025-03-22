@@ -1,0 +1,407 @@
+1. Inversion of Control (IoC)
+IoC is a design principle where the control of object creation and dependency management is inverted. Rather than objects controlling their own dependencies (e.g., creating new objects manually inside them), the control is transferred to an external entity, typically a framework. This decouples the object creation process and makes systems more modular and easier to test.
+
+How Spring Uses IoC: In Spring, IoC is implemented via the Spring IoC Container, which manages the lifecycle and dependencies of beans (objects). Spring takes responsibility for creating and managing objects and injecting their dependencies at runtime.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+2. Dependency Injection (DI)
+Dependency Injection is a specific form of IoC. It is a pattern where an object’s dependencies (services or collaborators) are provided (injected) by an external entity rather than the object itself creating them.
+
+How DI Works in Spring: In Spring, DI can be done via constructor injection, setter injection, or field injection. The Spring IoC container is responsible for injecting these dependencies when the bean is created.
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+3. Injection Types
+
+Constructor Injection: Dependencies are passed to the object through its constructor. This is generally preferred because it ensures that all required dependencies are provided when the object is created.
+@Component
+public class MyService {
+    private final MyDependency dependency;
+    
+    @Autowired
+    public MyService(MyDependency dependency) {
+        this.dependency = dependency;
+    }
+}
+
+Setter Injection: Dependencies are set through setter methods after object creation. This approach is more flexible but doesn't guarantee that all dependencies are provided when the object is created.
+@Component
+public class MyService {
+    private MyDependency dependency;
+    
+    @Autowired
+    public void setDependency(MyDependency dependency) {
+        this.dependency = dependency;
+    }
+}
+
+Field Injection: Dependencies are injected directly into the fields of the class. This approach is the least preferred as it bypasses encapsulation and makes the code harder to test.
+@Component
+public class MyService {
+    @Autowired
+    private MyDependency dependency;
+}
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+4.  Spring Framework Behind the Scenes
+
+Spring Container: The core of the Spring IoC is the Spring container. It’s responsible for instantiating, configuring, and managing the lifecycle of beans. The container can be configured using XML, annotations, or Java configuration.
+
+Bean Definition: In the Spring context, beans are defined by classes annotated with @Component, @Service, @Repository, or @Controller, or declared in XML configuration.
+
+ApplicationContext: It is the interface used by Spring to load beans and manage their lifecycle. The ApplicationContext is the main entry point for Spring applications.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+5. Injecting Literal or Primitive Values
+
+Spring allows you to inject literal or primitive values (like strings, integers, booleans, etc.) into your beans. These values can be provided directly within the Spring configuration (either XML or Java-based configuration)
+
+Create a application.properties or application.yml file:
+	my.property=Some value
+	my.number=10
+
+@Component
+public class MyService {
+    @Value("${my.property}")
+    private String myProperty;
+    
+    @Value("${my.number}")
+    private int myNumber;
+}
+Inject the property values into your beans using the @Value annotation:
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+6. Bean Scopes
+
+In Spring, the scope of a bean determines the lifecycle and visibility of the bean within the Spring container. The most common scopes are:
+
+1.Singleton (default scope): A single instance of the bean is created and shared across the application context.
+@Scope("singleton")
+@Component
+public class MyService {}
+
+2.Prototype: A new instance of the bean is created every time it is requested.
+@Scope("prototype")
+@Component
+public class MyService {}
+
+3.Request: A new instance of the bean is created for each HTTP request.
+
+4.Session: A new instance of the bean is created for each HTTP session.
+
+5.Application: A single instance of the bean is created for the entire web application (specific to web applications).
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+7. Bean Factory and Application  Context
+
+In the Spring Framework, both BeanFactory and ApplicationContext are interfaces that represent the core container for managing beans (objects) within the framework.
+
+1. BeanFactory
+ The BeanFactory is the simplest container in Spring. It is used for managing beans in a lightweight manner and provides the fundamental features for bean management, including bean creation, initialization, and dependency injection.
+Lazy Initialization: By default, BeanFactory only creates beans when they are requested, which means the beans are lazily initialized. This helps reduce the memory footprint during startup because beans are only created when they are actually needed.
+BeanFactory provides basic IoC (Inversion of Control) features like bean creation, dependency injection, and scope management. However, it lacks more advanced features like event propagation, internationalization, and AOP (Aspect-Oriented Programming) support.
+BeanFactory is primarily used in scenarios where minimal memory consumption is important, or for simple applications with fewer requirements. It is mostly used for lightweight applications or in environments where memory constraints are a concern.
+
+BeanFactory factory = new XmlBeanFactory(new ClassPathResource("beans.xml"));
+MyBean bean = (MyBean) factory.getBean("myBean");
+
+
+2.ApplicationContext
+The ApplicationContext is an extended and more feature-rich version of the BeanFactory. It is the main interface for accessing the Spring IoC container and managing beans. In addition to the core features of BeanFactory, ApplicationContext provides additional functionality, such as event handling, internationalization (i18n), and support for AOP.
+ By default, the ApplicationContext creates all singleton beans at the time the application context is initialized (eager initialization). This means that beans are instantiated and ready to be used as soon as the application start
+
+ApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
+MyBean bean = (MyBean) context.getBean("myBean");
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+8.Spring.xml file
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+---For Constructor Injection
+        <bean id="dev1" class="org.pratham.Dev">
+            <constructor-arg value="Prathamesh" />
+            <constructor-arg value="0" />
+            <constructor-arg  value="React" />
+            <constructor-arg ref="lap"/>
+        </bean>
+---For Setter Injection
+        <bean id="lap" class="org.pratham.Laptop">
+            <property name="company" value="Deal"></property>
+            <property name="lapid" value="101"></property>
+            <property name="price" value="60000"></property>
+         </bean>
+</beans>
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+9. Life Cycle of Beans
+
+The Bean Lifecycle in Spring describes the process through which a Spring bean is created, initialized, used, and eventually destroyed. The lifecycle of a bean is managed by the Spring IoC (Inversion of Control) container. 
+
+1.Loading Bean Definition
+The first stage in the Spring Bean Lifecycle is loading the bean definitions. The Spring container needs to know how to configure and instantiate the beans, including their dependencies, properties.When the Spring application starts, it reads the configuration metadata, which can be provided in various ways: via XML, Java-based configuration (@Configuration), or annotations (@Component).
+The Spring IoC container (such as ApplicationContext) loads these bean definitions and stores them internally. The beans are not yet created at this point — only the configuration and metadata are loaded.
+If you’re using XML configuration, Spring loads beans from the beans.xml file.
+If you're using annotations, the Spring container scans the classes annotated with @Component, @Service, @Repository, etc.
+
+2. Bean Instantiation
+ After loading the bean definitions, the next step is the actual instantiation of beans. In this stage, the Spring container creates the bean instance.When the Spring container needs a bean (either immediately at startup or lazily when requested), it uses the bean class definition (from the configuration metadata) to instantiate the bean. basically default values to the beans are assigned
+
+3. Bean Initialization
+ After the bean is instantiated, the next step is initializing the bean. This involves setting its properties (through dependency injection) and calling any initialization logic.
+
+4.Bean Destruction
+Definition: The final phase of the lifecycle is bean destruction. This occurs when the Spring container is destroyed, typically at the end of the application context's lifecycle.Before a bean is destroyed, Spring gives it an opportunity to clean up resources (e.g., closing database connections, releasing files, etc.). If a bean has a destroy method, Spring will invoke it.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+10. Spring Configuration With Annotations
+Spring allows you to configure beans using annotations rather than XML configuration. This makes the configuration process cleaner, more concise, and easier to maintain. The primary annotation for configuration is @Configuration.
+
+Key Annotations for Configuration:
+@Configuration: Indicates that a class contains Spring configuration and bean definitions. It is equivalent to an XML <beans> element in traditional XML-based configuration.
+@Bean: Used inside a @Configuration class to declare a Spring bean. This is equivalent to a <bean> declaration in XML.
+
+@Configuration
+public class AppConfig {
+    
+    @Bean
+    public MyBean myBean() {
+        return new MyBean();
+    }
+}
+In this example, the @Configuration annotation marks the class as a configuration class, and the @Bean annotation tells Spring to manage MyBean as a Spring bean.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+11. Spring Dependency Injection with Annotations and Autowiring
+
+Spring provides multiple ways to inject dependencies into beans. With annotations, the most common way is through constructor injection, setter injection, and field injection. Autowiring allows Spring to automatically resolve the bean dependencies.
+
+@Autowired: This annotation tells Spring to automatically wire a dependency into a bean.
+
+@Component
+public class MyService {
+   
+    private final MyRepository myRepository;
+    
+    @Autowired
+    public MyService(MyRepository myRepository) {
+        this.myRepository = myRepository;
+    }
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+12. @Qualifiers
+
+The @Qualifier annotation helps specify which bean to inject when multiple beans of the same type exist.
+
+Both are same component of ( MyRepository ) 
+@Component
+@Qualifier("myRepositoryImpl1")
+public class MyRepositoryImpl1 implements MyRepository {
+    // Implementation of the repository
+}
+@Component
+@Qualifier("myRepositoryImpl2")
+public class MyRepositoryImpl2 implements MyRepository {
+    // Another implementation of the repository
+}
+
+//Acces componet in Service
+@Component
+public class MyService {
+    
+    private final MyRepository myRepository;
+    
+    @Autowired
+    @Qualifier("myRepositoryImpl1") // Specifies which implementation to inject
+    public MyService(MyRepository myRepository) {
+        this.myRepository = myRepository;
+    }
+}
+The @Qualifier annotation specifies which bean to inject when there are multiple candidates. In this case, myRepositoryImpl1 would be injected into MyService.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+13. Bean Scopes with Annotations
+
+Spring supports several bean scopes, which determine the lifecycle and visibility of a bean within the container. By default, Spring beans are singleton scoped, but you can specify other scopes using annotations.
+
+Common Bean Scopes:
+Singleton (Default): Only one instance of the bean is created for the entire Spring container.
+
+Prototype: A new instance of the bean is created every time it is requested.
+
+Request: A new bean is created for each HTTP request (used in web applications).
+
+Session: A new bean is created for each HTTP session (used in web applications).
+
+Application: A new bean is created for the entire lifecycle of the ServletContext.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+14. @ComponentScan
+
+The @ComponentScan annotation in Spring is used to automatically discover and register beans in the Spring application context. It tells Spring where to search for classes annotated with @Component, @Service, @Repository, @Controller, and other similar annotations.
+
+When you annotate a class with @ComponentScan, Spring scans the specified package (or packages) for annotated classes and registers them as beans in the application context. You typically use @ComponentScan along with @Configuration in Java-based Spring configuration classes.  It is commonly used in Spring Boot applications, where component scanning is done automatically in the main application class.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+15. Generic Stereotype for any spring-managed component
+
+1. @component  : The @Component annotation is a generic stereotype that can be applied to any class to indicate that it is a Spring-managed component. When a class is annotated with @Component, Spring will automatically detect and register it as a bean during component scanning.
+
+2. @Service: Typically used for service classes that contain business logic.
+
+3.@Repository: Used to define classes that are responsible for data access logic (DAO layers). It also provides additional exception translation features for persistence layers.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+16. Spring With JDBC
+
+Spring makes working with JDBC much easier by providing a JDBC abstraction layer. This abstraction removes the need for boilerplate code and enhances the flexibility of database operations.
+Spring handles connection management, error handling, and resource cleanup. This reduces the chances of errors and makes the code more maintainable.
+
+ 1. Spring DataSource Configuration :  Define the DataSource that will be used to establish connections. A DataSource is the factory for database connections. In Spring, DataSource objects are typically configured via XML or Java-based configuration.
+
+A. Java Base Configuration
+@Configuration
+public class DataSourceConfig {
+    @Bean
+    public DataSource dataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/mydb");
+        dataSource.setUsername("user");
+        dataSource.setPassword("password");
+        return dataSource;
+    }
+}
+
+B.Using XML configuration:
+<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+    <property name="url" value="jdbc:mysql://localhost:3306/mydb"/>
+    <property name="username" value="user"/>
+    <property name="password" value="password"/>
+</bean>
+
+B.Create JdbcTemplate Bean 
+
+JdbcDaoSupport, which is the super class for accessing data using JDBC. You must provide a DataSource instance to it. 
+This class, in turn, provides the JdbcTemplate instance, created from the supplied  DataSource instance, to the sub-class.
+
+The JdbcTemplate class is the core class in Spring's JDBC module. It simplifies the process of interacting with a relational database by handling the boilerplate code for you. It provides methods for executing SQL queries, updates, and stored procedures, as well as retrieving data
+	JdbcTemplate is a class.
+	From package - org.springframework.dao
+	It’s a Thread Safe class.
+	Its an abstraction to JDBC AP
+
+
+@Configuration
+public class JdbcTemplateConfig {
+
+    @Autowired
+    private DataSource dataSource;
+    
+    @Bean
+    public JdbcTemplate jdbcTemplate() {
+        return new JdbcTemplate(dataSource);
+    }
+}
+
+C.Perform Database Operations: Use JdbcTemplate to execute queries, updates, and retrieve results
+public class EmployeeDao {
+    
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public List<Employee> findAll() {
+        String sql = "SELECT * FROM employee";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Employee.class));
+    }
+
+    public int updateSalary(int employeeId, double salary) {
+        String sql = "UPDATE employee SET salary = ? WHERE id = ?";
+        return jdbcTemplate.update(sql, salary, employeeId);
+    }
+}
+
+D. Important Interfaces to Fetch Data Using JdbcTemplate
+
+1. RowMapper : Used to map rows of a result set to Java objects.
+Example: Using BeanPropertyRowMapper to map rows to a class
+List<Employee> employees = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Employee.class));
+
+2. ResultSetExtractor : An interface for extracting results from a ResultSet and processing them in a custom way.
+
+3.PreparedStatementSetter : This interface is used to set parameters in a PreparedStatement. It is used when you need to pass parameters for SQL queries.
+String sql = "UPDATE employee SET salary = ? WHERE id = ?";
+jdbcTemplate.update(sql, new PreparedStatementSetter() {
+    @Override
+    public void setValues(PreparedStatement ps) throws SQLException {
+        ps.setDouble(1, 50000);
+        ps.setInt(2, 1);
+    }
+});
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+17. Spring MVC
+
+Spring MVC Basic Architecture
+
+1.DispatcherServlet: It is the front controller of the Spring MVC architecture, which handles all incoming HTTP requests and delegates them to the appropriate controllers.
+
+2.Controller: The controller is responsible for processing requests. It receives user input, interacts with the model, and returns a ModelAndView object, which contains the model and the view to be rendered.
+
+3.View: Represents the user interface (UI). It’s responsible for rendering the output, typically using technologies like JSP, Thymeleaf, or other.
+
+4.Model: Represents the business logic and data. It can be an object representing a record or a collection of records (like a User or Product).
+
+5.HandlerMapping: Determines which controller should handle a given request. It maps the request URL to a specific controller method.
+
+6.HandlerInterceptor: It allows pre- and post-processing of a request before it reaches the controller or before the response is sent back to the client.
+
+7.View Resolver: Resolves the logical view name to an actual view, like a JSP or Thymeleaf template.
+
+What is @ModelAttribute?
+
+The @ModelAttribute annotation is used in two primary scenarios:
+	1.Binding request parameters to a model object: It binds the request parameters (from an HTTP request) to the fields of a model object. This is typically used when you are 			handling forms.
+
+	2.Adding attributes to the model: It can also be used to populate the model with attributes before a handler method is invoked or before returning a view.
+
+The Spring framework comes with quite a few view resolvers e.g.,InternalResourceViewResolver, BeanNameViewResolver
+1.InternalResourceViewResolver :-  This ViewResolver allows us to set properties such as prefix or suffix to the view name to generate the final view page URL
+2.BeanNameViewResolver :- This is an implementation of ViewResovler that interprets a view name as a bean name in the current application context. Each such View can be defined as a bean in XML or Java configurations
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+18. Spring REST Annotations
+
+1. @RestController  :- The @RestController annotation is used to define the RESTful web services. It serves  JSON, XML and custom response
+2. @RequestMapping : -The @RequestMapping annotation is used to define the Request URI to access the REST Endpoints.
+3. @RequestBody : The @RequestBody annotation is used to define the request body content type.
+4. @PathVariable :  The @PathVariable annotation is used to define the custom or dynamic request URI. The Path variable in request URI is defined as curly braces {}.
+5. @Request Parameter : The @RequestParam annotation is used to read the request parameters from the Request URL. By default, it is a required parameter
+
+
+GET : The default HTTP request method is GET. This method does not require any Request Body. You can send request parameters and path variables to define the custom or dynamic URL
+ 
+POST : The HTTP POST request is used to create a resource. This method contains the Request Body. We can send request parameters and path variables to define the custom or dynamic URL.
+
+PUT :  The HTTP PUT request is used to update the existing resource. This method contains a Request Body. We can send request parameters and path variables to define the custom or dynamic URL
+
+DELETE : The HTTP Delete request is used to delete the existing resource. This method does not contain any Request Body. We can send request parameters and path variables to define the custom or dynamic URL.
+
+
+--------------------------------------------------------------------- End of Spring -------------------------------------------------------------------------------
+
+
+
